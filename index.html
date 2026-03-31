@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDA Simulator — Pushdown Automata Visualizer</title>
+  <meta name="description" content="An interactive Pushdown Automata (PDA) Simulator with step-by-step animation, stack visualization, and educational explanations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ── HEADER ── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon">⊢</span>
+        <div>
+          <h1 class="brand-title">PDA Simulator</h1>
+          <span class="brand-sub">Pushdown Automata Visualizer</span>
+        </div>
+      </div>
+      <nav class="tab-nav" role="tablist" aria-label="Main navigation">
+        <button class="tab-btn active" id="tab-sim-btn" role="tab" aria-selected="true" aria-controls="panel-sim" onclick="switchTab('sim')">Simulator</button>
+        <button class="tab-btn" id="tab-learn-btn" role="tab" aria-selected="false" aria-controls="panel-learn" onclick="switchTab('learn')">Learn PDA</button>
+        <button class="tab-btn" id="tab-editor-btn" role="tab" aria-selected="false" aria-controls="panel-editor" onclick="switchTab('editor')">Transition Editor</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <main class="main-wrap">
+
+    <!-- ═══════════════════════════════ SIMULATOR PANEL ═══════════════════════════════ -->
+    <section id="panel-sim" class="tab-panel active" role="tabpanel" aria-labelledby="tab-sim-btn">
+
+      <!-- Left sidebar: Controls -->
+      <aside class="sidebar-left">
+        <div class="card" id="preset-card">
+          <h2 class="card-title"><span class="pill">01</span> Choose Language</h2>
+          <div class="preset-grid">
+            <button class="preset-btn active" id="preset-anbn" onclick="loadPreset('anbn')">
+              <span class="preset-formula">aⁿbⁿ</span>
+              <span class="preset-desc">Equal a's and b's</span>
+            </button>
+            <button class="preset-btn" id="preset-paren" onclick="loadPreset('paren')">
+              <span class="preset-formula">( )</span>
+              <span class="preset-desc">Balanced parentheses</span>
+            </button>
+          </div>
+          <div class="divider"></div>
+          <label class="field-label" for="input-string">Input String</label>
+          <div class="input-row">
+            <input type="text" id="input-string" class="code-input" placeholder="e.g. aaabbb" spellcheck="false" autocomplete="off" />
+            <button class="btn-icon" id="btn-validate" onclick="validateInput()" title="Validate input">✓</button>
+          </div>
+          <div id="input-hint" class="hint-text"></div>
+
+          <div class="quick-strings">
+            <span class="qs-label">Quick fill:</span>
+            <div id="quick-btns" class="qs-btns"></div>
+          </div>
+        </div>
+
+        <div class="card" id="controls-card">
+          <h2 class="card-title"><span class="pill">02</span> Controls</h2>
+          <div class="speed-row">
+            <label class="field-label" for="speed-range">Speed</label>
+            <input type="range" id="speed-range" min="1" max="5" value="2" class="speed-slider" oninput="updateSpeed(this.value)" />
+            <span id="speed-label" class="speed-val">Normal</span>
+          </div>
+          <div class="ctrl-btns">
+            <button class="btn btn-primary" id="btn-run" onclick="runSimulation()">▶ Run</button>
+            <button class="btn btn-ghost" id="btn-pause" onclick="pauseSimulation()" disabled>⏸ Pause</button>
+            <button class="btn btn-ghost" id="btn-step" onclick="stepOnce()">⏭ Step</button>
+            <button class="btn btn-ghost" id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
+          </div>
+
+          <div id="status-bar" class="status-bar status-idle">
+            <span id="status-icon">◈</span>
+            <span id="status-text">Ready — load a preset or type an input string.</span>
+          </div>
+        </div>
+
+        <!-- Current config display -->
+        <div class="card" id="config-card">
+          <h2 class="card-title"><span class="pill">03</span> Configuration</h2>
+          <div class="config-table" id="config-table"></div>
+        </div>
+      </aside>
+
+      <!-- Center: Visualization -->
+      <div class="viz-center">
+        <!-- State diagram -->
+        <div class="viz-block">
+          <div class="viz-header">
+            <span class="viz-label">State Diagram</span>
+            <span class="viz-hint" id="diagram-hint">Select a language to begin</span>
+          </div>
+          <div class="canvas-wrap">
+            <canvas id="state-canvas" width="680" height="280"></canvas>
+          </div>
+        </div>
+
+        <!-- Tape + Stack row -->
+        <div class="tape-stack-row">
+          <!-- Input tape -->
+          <div class="tape-block">
+            <div class="viz-label">Input Tape</div>
+            <div class="tape-wrap" id="tape-display"></div>
+          </div>
+
+          <!-- Stack -->
+          <div class="stack-block">
+            <div class="viz-label">Stack</div>
+            <div class="stack-wrap">
+              <div class="stack-container" id="stack-display"></div>
+              <div class="stack-bottom">▩ Bottom (Z₀)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step explanation -->
+        <div class="explanation-block" id="explanation-block">
+          <div class="explanation-header">
+            <span class="exp-icon">⚙</span>
+            <span class="exp-title">Step Explanation</span>
+            <span class="step-counter" id="step-counter"></span>
+          </div>
+          <div class="explanation-body" id="explanation-body">
+            <p class="exp-idle">Run the simulation or press Step to see detailed explanations for each transition.</p>
+          </div>
+          <div class="transition-display" id="transition-display"></div>
+        </div>
+      </div>
+
+      <!-- Right sidebar: Step log + Computation path -->
+      <aside class="sidebar-right">
+        <div class="card" id="log-card">
+          <h2 class="card-title"><span class="pill">04</span> Computation Path</h2>
+          <div class="log-body" id="step-log">
+            <p class="log-idle">Computation steps will appear here.</p>
+          </div>
+        </div>
+
+        <div class="card" id="pda-tuple-card">
+          <h2 class="card-title"><span class="pill">05</span> PDA 7-Tuple</h2>
+          <div id="pda-tuple-display" class="tuple-display"></div>
+        </div>
+      </aside>
+
+    </section>
+
+    <!-- ═══════════════════════════════ LEARN PANEL ═══════════════════════════════ -->
+    <section id="panel-learn" class="tab-panel" role="tabpanel" aria-labelledby="tab-learn-btn">
+      <div class="learn-wrap">
+        <div class="learn-hero">
+          <div class="learn-hero-badge">Theory</div>
+          <h2 class="learn-title">What is a Pushdown Automaton?</h2>
+          <p class="learn-subtitle">A powerful computational model that extends Finite Automata with an unbounded stack memory.</p>
+        </div>
+
+        <div class="learn-grid">
+          <div class="learn-card">
+            <div class="learn-card-icon">🤖</div>
+            <h3>Informal Definition</h3>
+            <p>A PDA is like a Finite Automaton but with a <strong>stack</strong> (LIFO memory). It reads input symbols one at a time and can push or pop symbols from the stack. The stack gives it more power — PDAs can recognize all <em>Context-Free Languages</em>, which FAs cannot.</p>
+          </div>
+          <div class="learn-card">
+            <div class="learn-card-icon">🧮</div>
+            <h3>Formal Definition</h3>
+            <p>A PDA is a 7-tuple <code>M = (Q, Σ, Γ, δ, q₀, Z₀, F)</code> where:</p>
+            <ul class="formal-list">
+              <li><code>Q</code> — finite set of <strong>states</strong></li>
+              <li><code>Σ</code> — finite <strong>input alphabet</strong></li>
+              <li><code>Γ</code> — finite <strong>stack alphabet</strong></li>
+              <li><code>δ</code> — <strong>transition function</strong>: Q × (Σ ∪ {ε}) × Γ → P(Q × Γ*)</li>
+              <li><code>q₀ ∈ Q</code> — <strong>initial state</strong></li>
+              <li><code>Z₀ ∈ Γ</code> — <strong>initial stack symbol</strong></li>
+              <li><code>F ⊆ Q</code> — set of <strong>accepting states</strong></li>
+            </ul>
+          </div>
+          <div class="learn-card">
+            <div class="learn-card-icon">📚</div>
+            <h3>Acceptance</h3>
+            <p>A string is <strong>accepted</strong> if the PDA reaches a final state after reading all input (acceptance by final state), or if the stack becomes empty (acceptance by empty stack).</p>
+            <div class="acceptance-chips">
+              <span class="chip chip-accept">Final State</span>
+              <span class="chip chip-or">OR</span>
+              <span class="chip chip-accept">Empty Stack</span>
+            </div>
+          </div>
+          <div class="learn-card">
+            <div class="learn-card-icon">⚡</div>
+            <h3>vs Finite Automata</h3>
+            <table class="compare-table">
+              <tr><th>Feature</th><th>FA</th><th>PDA</th></tr>
+              <tr><td>Memory</td><td>None</td><td>Unbounded Stack</td></tr>
+              <tr><td>Languages</td><td>Regular</td><td>Context-Free</td></tr>
+              <tr><td>aⁿbⁿ</td><td>❌</td><td>✅</td></tr>
+              <tr><td>Balanced ( )</td><td>❌</td><td>✅</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="learn-section">
+          <h3 class="section-title">Transition Function δ</h3>
+          <p>Each transition has the form: <code>δ(state, input_symbol, stack_top) = (new_state, push_string)</code></p>
+          <div class="transition-example">
+            <div class="trans-ex-row">
+              <span class="trans-ex-label">Reading</span>
+              <code class="trans-ex-code">δ(q₀, a, Z₀) = (q₀, AZ₀)</code>
+              <span class="trans-ex-desc">In state q₀, reading 'a', with Z₀ on stack → stay in q₀ and push A onto stack</span>
+            </div>
+            <div class="trans-ex-row">
+              <span class="trans-ex-label">ε-transition</span>
+              <code class="trans-ex-code">δ(q₁, ε, Z₀) = (q₂, Z₀)</code>
+              <span class="trans-ex-desc">Without reading input, if Z₀ on top → move to q₂ (ε-move)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="learn-section">
+          <h3 class="section-title">Example Languages</h3>
+          <div class="example-langs">
+            <div class="example-lang-card">
+              <h4>L = { aⁿbⁿ | n ≥ 1 }</h4>
+              <p>Strings where the number of a's equals the number of b's. Example: <code>ab</code>, <code>aabb</code>, <code>aaabbb</code></p>
+              <p><strong>Strategy:</strong> Push one stack symbol for each 'a', then pop one for each 'b'. If stack is empty when input is exhausted → accept.</p>
+            </div>
+            <div class="example-lang-card">
+              <h4>Balanced Parentheses</h4>
+              <p>Strings of correctly matched parentheses. Example: <code>()</code>, <code>(())</code>, <code>(()())</code></p>
+              <p><strong>Strategy:</strong> Push for each '(' and pop for each ')'. Accept if stack empty at end.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════ EDITOR PANEL ═══════════════════════════════ -->
+    <section id="panel-editor" class="tab-panel" role="tabpanel" aria-labelledby="tab-editor-btn">
+      <div class="editor-wrap">
+        <div class="editor-header-row">
+          <div>
+            <h2 class="editor-title">Transition Editor</h2>
+            <p class="editor-sub">Edit the PDA's transition rules directly using JSON. Changes are applied to the simulator instantly.</p>
+          </div>
+          <div class="editor-actions">
+            <button class="btn btn-ghost" onclick="applyEditorChanges()">Apply Changes</button>
+            <button class="btn btn-primary" onclick="switchTab('sim')">▶ Go to Simulator</button>
+          </div>
+        </div>
+        <div class="editor-grid">
+          <div class="editor-pane">
+            <div class="editor-pane-header">
+              <span>transitions.json</span>
+              <div class="editor-dots"><span></span><span></span><span></span></div>
+            </div>
+            <textarea id="json-editor" class="json-editor" spellcheck="false" placeholder="Loading..."></textarea>
+            <div id="editor-status" class="editor-status"></div>
+          </div>
+          <div class="editor-doc">
+            <h3>Schema Reference</h3>
+            <pre class="schema-box">{
+  "name": "Language name",
+  "description": "Description",
+  "states": ["q0", "q1", "q2"],
+  "inputAlphabet": ["a", "b"],
+  "stackAlphabet": ["A", "Z0"],
+  "initialState": "q0",
+  "initialStack": "Z0",
+  "acceptStates": ["q2"],
+  "transitions": [
+    {
+      "from": "q0",
+      "input": "a",
+      "stackTop": "Z0",
+      "to": "q0",
+      "push": "AZ0"
+    }
+  ],
+  "examples": ["aabb", "ab"]
+}</pre>
+            <div class="doc-note">
+              <strong>push</strong> field: The string to push onto the stack after popping the current top. Left character ends up on top. Use <code>"ε"</code> or <code>""</code> for pop without push.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>PDA Simulator · Built for learning Formal Language Theory</span>
+    <span class="footer-sep">·</span>
+    <span>Pushdown Automata accept all Context-Free Languages</span>
+  </footer>
+
+  <script src="pda.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
