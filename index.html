@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDA Simulator — Pushdown Automata Visualizer</title>
-  <meta name="description" content="An interactive Pushdown Automata (PDA) Simulator with step-by-step animation, stack visualization, and educational explanations." />
+  <title>PDA Simulator — Universal NPDA Engine</title>
+  <meta name="description" content="An interactive Universal NPDA Simulator with step-by-step animation, stack visualization, phase indicators, smart string builder, and a row-by-row transition table editor." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -18,13 +18,15 @@
         <span class="brand-icon">⊢</span>
         <div>
           <h1 class="brand-title">PDA Simulator</h1>
-          <span class="brand-sub">Pushdown Automata Visualizer</span>
+          <span class="brand-sub">Universal NPDA Engine</span>
         </div>
       </div>
       <nav class="tab-nav" role="tablist" aria-label="Main navigation">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Theme">☀️</button>
         <button class="tab-btn active" id="tab-sim-btn" role="tab" aria-selected="true" aria-controls="panel-sim" onclick="switchTab('sim')">Simulator</button>
         <button class="tab-btn" id="tab-learn-btn" role="tab" aria-selected="false" aria-controls="panel-learn" onclick="switchTab('learn')">Learn PDA</button>
-        <button class="tab-btn" id="tab-editor-btn" role="tab" aria-selected="false" aria-controls="panel-editor" onclick="switchTab('editor')">Transition Editor</button>
+        <button class="tab-btn" id="tab-table-btn" role="tab" aria-selected="false" aria-controls="panel-table" onclick="switchTab('table')">Table Editor</button>
+        <button class="tab-btn" id="tab-editor-btn" role="tab" aria-selected="false" aria-controls="panel-editor" onclick="switchTab('editor')">JSON Editor</button>
       </nav>
     </div>
   </header>
@@ -32,68 +34,98 @@
   <!-- ── MAIN ── -->
   <main class="main-wrap">
 
-    <!-- ═══════════════════════════════ SIMULATOR PANEL ═══════════════════════════════ -->
+    <!-- ═══════════════════ SIMULATOR PANEL ═══════════════════ -->
     <section id="panel-sim" class="tab-panel active" role="tabpanel" aria-labelledby="tab-sim-btn">
 
-      <!-- Left sidebar: Controls -->
+      <!-- Left sidebar -->
       <aside class="sidebar-left">
-        <div class="card" id="preset-card">
-          <h2 class="card-title"><span class="pill">01</span> Choose Language</h2>
-          <div class="preset-grid">
-            <button class="preset-btn active" id="preset-anbn" onclick="loadPreset('anbn')">
-              <span class="preset-formula">aⁿbⁿ</span>
-              <span class="preset-desc">Equal a's and b's</span>
-            </button>
-            <button class="preset-btn" id="preset-paren" onclick="loadPreset('paren')">
-              <span class="preset-formula">( )</span>
-              <span class="preset-desc">Balanced parentheses</span>
-            </button>
+
+        <!-- Card 01: String Builder -->
+        <div class="card" id="builder-card">
+          <h2 class="card-title"><span class="pill">01</span> String Builder</h2>
+          <div class="builder-wrap">
+            <label class="field-label" for="builder-lang">Language</label>
+            <select id="builder-lang" class="builder-select" onchange="onBuilderLangChange()">
+              <option value="anbn">aⁿbⁿ — Equal a's and b's</option>
+              <option value="paren">( ) — Balanced Parens</option>
+              <option value="anb2n">aⁿb²ⁿ — Double b's</option>
+              <option value="wcwr">wcwᴿ — Palindrome</option>
+              <option value="anbmcnpm">aⁿbᵐcⁿ⁺ᵐ — Push a&b, pop c</option>
+              <option value="anbncm">aⁿbⁿ⁺ᵐcᵐ — Match &amp; count</option>
+              <option value="anmbmcn">aⁿ⁺ᵐbᵐcⁿ — Push all a's</option>
+            </select>
+
+            <!-- n and m inputs -->
+            <div class="nm-row">
+              <div class="nm-field" id="n-field">
+                <label class="field-label" for="n-input">n</label>
+                <input type="number" id="n-input" min="1" max="12" value="2" class="nm-input" oninput="updateBuilderPreview()" />
+              </div>
+              <div class="nm-field" id="m-field" style="display:none">
+                <label class="field-label" for="m-input">m</label>
+                <input type="number" id="m-input" min="1" max="12" value="2" class="nm-input" oninput="updateBuilderPreview()" />
+              </div>
+            </div>
+
+            <!-- wcwᴿ specific options -->
+            <div id="wcwr-panel" style="display:none">
+              <div class="wcwr-mode-row">
+                <button class="mode-btn active" id="mode-random" onclick="setWcwrMode('random')">🎲 Random w</button>
+                <button class="mode-btn" id="mode-manual" onclick="setWcwrMode('manual')">✏️ Type w</button>
+              </div>
+              <div id="wcwr-manual-panel" style="display:none">
+                <label class="field-label" for="w-input">w (a and b only)</label>
+                <input type="text" id="w-input" class="code-input" placeholder="e.g. aab" oninput="updateBuilderPreview()" />
+              </div>
+            </div>
+
+            <div id="builder-preview" class="builder-preview"></div>
+            <button class="btn btn-primary btn-full" id="btn-generate" onclick="generateAndRun()">⚡ Generate &amp; Run</button>
           </div>
-          <div class="divider"></div>
+        </div>
+
+        <!-- Card 02: Manual Input -->
+        <div class="card" id="manual-card">
+          <h2 class="card-title"><span class="pill">02</span> Manual Input</h2>
           <label class="field-label" for="input-string">Input String</label>
           <div class="input-row">
-            <input type="text" id="input-string" class="code-input" placeholder="e.g. aaabbb" spellcheck="false" autocomplete="off" />
-            <button class="btn-icon" id="btn-validate" onclick="validateInput()" title="Validate input">✓</button>
+            <input type="text" id="input-string" class="code-input" placeholder="e.g. aaabbb" spellcheck="false" autocomplete="off" oninput="validateInput()" onkeydown="if(event.key === 'Enter') runSimulation()" />
+            <button class="btn-icon" id="btn-validate" onclick="runSimulation()" title="Run Simulation">▶</button>
           </div>
           <div id="input-hint" class="hint-text"></div>
-
           <div class="quick-strings">
             <span class="qs-label">Quick fill:</span>
             <div id="quick-btns" class="qs-btns"></div>
           </div>
         </div>
 
+        <!-- Card 03: Controls -->
         <div class="card" id="controls-card">
-          <h2 class="card-title"><span class="pill">02</span> Controls</h2>
+          <h2 class="card-title"><span class="pill">03</span> Controls</h2>
           <div class="speed-row">
             <label class="field-label" for="speed-range">Speed</label>
             <input type="range" id="speed-range" min="1" max="5" value="2" class="speed-slider" oninput="updateSpeed(this.value)" />
             <span id="speed-label" class="speed-val">Normal</span>
           </div>
           <div class="ctrl-btns">
-            <button class="btn btn-primary" id="btn-run" onclick="runSimulation()">▶ Run</button>
-            <button class="btn btn-ghost" id="btn-pause" onclick="pauseSimulation()" disabled>⏸ Pause</button>
-            <button class="btn btn-ghost" id="btn-step" onclick="stepOnce()">⏭ Step</button>
-            <button class="btn btn-ghost" id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
+            <button class="btn btn-primary" id="btn-run"   onclick="runSimulation()">▶ Run</button>
+            <button class="btn btn-ghost"   id="btn-pause" onclick="pauseSimulation()" disabled>⏸ Pause</button>
+            <button class="btn btn-ghost"   id="btn-step"  onclick="stepOnce()">⏭ Step</button>
+            <button class="btn btn-ghost"   id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
           </div>
-
           <div id="status-bar" class="status-bar status-idle">
             <span id="status-icon">◈</span>
-            <span id="status-text">Ready — load a preset or type an input string.</span>
+            <span id="status-text">Ready — load a preset or use the String Builder.</span>
           </div>
         </div>
 
-        <!-- Current config display -->
-        <div class="card" id="config-card">
-          <h2 class="card-title"><span class="pill">03</span> Configuration</h2>
-          <div class="config-table" id="config-table"></div>
-        </div>
+
       </aside>
 
       <!-- Center: Visualization -->
       <div class="viz-center">
         <!-- State diagram -->
-        <div class="viz-block">
+        <div class="viz-block" id="viz-diagram">
           <div class="viz-header">
             <span class="viz-label">State Diagram</span>
             <span class="viz-hint" id="diagram-hint">Select a language to begin</span>
@@ -103,15 +135,18 @@
           </div>
         </div>
 
+        <!-- Phase indicator -->
+        <div class="phase-bar" id="phase-bar">
+          <span class="phase-bar-icon">◈</span>
+          <span class="phase-bar-text" id="phase-bar-text">Run a simulation to see the current computation phase.</span>
+        </div>
+
         <!-- Tape + Stack row -->
         <div class="tape-stack-row">
-          <!-- Input tape -->
           <div class="tape-block">
             <div class="viz-label">Input Tape</div>
             <div class="tape-wrap" id="tape-display"></div>
           </div>
-
-          <!-- Stack -->
           <div class="stack-block">
             <div class="viz-label">Stack</div>
             <div class="stack-wrap">
@@ -135,7 +170,7 @@
         </div>
       </div>
 
-      <!-- Right sidebar: Step log + Computation path -->
+      <!-- Right sidebar: log + tuple -->
       <aside class="sidebar-right">
         <div class="card" id="log-card">
           <h2 class="card-title"><span class="pill">04</span> Computation Path</h2>
@@ -143,7 +178,6 @@
             <p class="log-idle">Computation steps will appear here.</p>
           </div>
         </div>
-
         <div class="card" id="pda-tuple-card">
           <h2 class="card-title"><span class="pill">05</span> PDA 7-Tuple</h2>
           <div id="pda-tuple-display" class="tuple-display"></div>
@@ -152,7 +186,7 @@
 
     </section>
 
-    <!-- ═══════════════════════════════ LEARN PANEL ═══════════════════════════════ -->
+    <!-- ═══════════════════ LEARN PANEL ═══════════════════ -->
     <section id="panel-learn" class="tab-panel" role="tabpanel" aria-labelledby="tab-learn-btn">
       <div class="learn-wrap">
         <div class="learn-hero">
@@ -199,53 +233,183 @@
               <tr><td>Memory</td><td>None</td><td>Unbounded Stack</td></tr>
               <tr><td>Languages</td><td>Regular</td><td>Context-Free</td></tr>
               <tr><td>aⁿbⁿ</td><td>❌</td><td>✅</td></tr>
-              <tr><td>Balanced ( )</td><td>❌</td><td>✅</td></tr>
+              <tr><td>wcwᴿ</td><td>❌</td><td>✅</td></tr>
             </table>
           </div>
         </div>
 
         <div class="learn-section">
-          <h3 class="section-title">Transition Function δ</h3>
-          <p>Each transition has the form: <code>δ(state, input_symbol, stack_top) = (new_state, push_string)</code></p>
-          <div class="transition-example">
-            <div class="trans-ex-row">
-              <span class="trans-ex-label">Reading</span>
-              <code class="trans-ex-code">δ(q₀, a, Z₀) = (q₀, AZ₀)</code>
-              <span class="trans-ex-desc">In state q₀, reading 'a', with Z₀ on stack → stay in q₀ and push A onto stack</span>
+          <h3 class="section-title">Classic Languages</h3>
+          <div class="example-langs">
+            <div class="example-lang-card">
+              <h4>L = { aⁿbⁿ | n ≥ 1 }</h4>
+              <p>Equal number of a's and b's. Example: <code>ab</code>, <code>aabb</code>, <code>aaabbb</code></p>
+              <p><strong>Strategy:</strong> Push A for each 'a', pop A for each 'b'. Accept when stack returns to Z₀.</p>
             </div>
-            <div class="trans-ex-row">
-              <span class="trans-ex-label">ε-transition</span>
-              <code class="trans-ex-code">δ(q₁, ε, Z₀) = (q₂, Z₀)</code>
-              <span class="trans-ex-desc">Without reading input, if Z₀ on top → move to q₂ (ε-move)</span>
+            <div class="example-lang-card">
+              <h4>Balanced Parentheses</h4>
+              <p>Correctly matched parentheses. Example: <code>()</code>, <code>(())</code>, <code>(()())</code></p>
+              <p><strong>Strategy:</strong> Push P for each '(' and pop for each ')'. Accept when stack empty at end.</p>
+            </div>
+            <div class="example-lang-card">
+              <h4>L = { aⁿb²ⁿ | n ≥ 1 }</h4>
+              <p>Twice as many b's as a's. Example: <code>abb</code>, <code>aabbbb</code>, <code>aaabbbbbb</code></p>
+              <p><strong>Strategy:</strong> Push 2 A's per 'a' (net +2). Pop 1 A per 'b'. Accept when 2n pops clear the stack.</p>
+            </div>
+            <div class="example-lang-card">
+              <h4>L = { wcwᴿ | w ∈ {a,b}* }</h4>
+              <p>Palindrome with explicit centre marker 'c'. Example: <code>abcba</code>, <code>aabcbaa</code></p>
+              <p><strong>Strategy:</strong> Push each symbol of w. On 'c', switch to pop mode and match wᴿ symbol by symbol.</p>
+              <p><strong>Note:</strong> This requires a DPDA — the 'c' acts as an unambiguous pivot.</p>
             </div>
           </div>
         </div>
 
         <div class="learn-section">
-          <h3 class="section-title">Example Languages</h3>
-          <div class="example-langs">
+          <h3 class="section-title">Summation Languages (Three-Variable)</h3>
+          <p style="font-size:0.85rem; color:var(--white-dim); margin-bottom:14px">These languages require multi-phase stack logic with ε-transitions between phases.</p>
+          <div class="example-langs three-col">
             <div class="example-lang-card">
-              <h4>L = { aⁿbⁿ | n ≥ 1 }</h4>
-              <p>Strings where the number of a's equals the number of b's. Example: <code>ab</code>, <code>aabb</code>, <code>aaabbb</code></p>
-              <p><strong>Strategy:</strong> Push one stack symbol for each 'a', then pop one for each 'b'. If stack is empty when input is exhausted → accept.</p>
+              <h4>L = { aⁿbᵐcⁿ⁺ᵐ | n, m ≥ 1 }</h4>
+              <p>Total c's = n+m. Example: <code>abcc</code>, <code>aabccc</code>, <code>aabbcccc</code></p>
+              <p><strong>Strategy:</strong> Push A for each 'a', push B for each 'b'. Stack depth = n+m. Pop one symbol per 'c'.</p>
+              <p><strong>Phases:</strong> Push-a → Push-b → Pop-c</p>
             </div>
             <div class="example-lang-card">
-              <h4>Balanced Parentheses</h4>
-              <p>Strings of correctly matched parentheses. Example: <code>()</code>, <code>(())</code>, <code>(()())</code></p>
-              <p><strong>Strategy:</strong> Push for each '(' and pop for each ')'. Accept if stack empty at end.</p>
+              <h4>L = { aⁿbⁿ⁺ᵐcᵐ | n ≥ 1, m ≥ 0 }</h4>
+              <p>First n b's match a's; extra m b's verified by c's. Example: <code>ab</code>, <code>abbc</code>, <code>aabbbcc</code></p>
+              <p><strong>Strategy:</strong> Push A per 'a'. Pop A per 'b' (n-match). When A's exhausted, push B for extra b's. Pop B per 'c'.</p>
+              <p><strong>Phases:</strong> Push-a → Pop-A(b) → Push-B(b) → Pop-B(c)</p>
+            </div>
+            <div class="example-lang-card">
+              <h4>L = { aⁿ⁺ᵐbᵐcⁿ | n, m ≥ 0 }</h4>
+              <p>Push all a's (n+m), pop m for b's, pop n for c's. Example: <code>ac</code>, <code>aabc</code>, <code>aaabcc</code></p>
+              <p><strong>Strategy:</strong> Push A for every 'a'. Pop A per 'b' (the m-component). Pop A per 'c' (the n-component).</p>
+              <p><strong>Phases:</strong> Push-a(n+m) → Pop-A(b) → Pop-A(c)</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══════════════════════════════ EDITOR PANEL ═══════════════════════════════ -->
+    <!-- ═══════════════════ TABLE EDITOR PANEL ═══════════════════ -->
+    <section id="panel-table" class="tab-panel" role="tabpanel" aria-labelledby="tab-table-btn">
+      <div class="te-wrap">
+
+        <!-- Left meta panel -->
+        <div class="te-meta-panel">
+          <div class="te-section-hdr">
+            <span class="te-section-icon">⚙</span>
+            <span>PDA Metadata</span>
+          </div>
+
+          <div class="te-meta-fields">
+            <div class="te-field">
+              <label class="field-label" for="te-name">PDA Name</label>
+              <input id="te-name" type="text" class="te-input" placeholder="My Custom PDA" />
+            </div>
+            <div class="te-field">
+              <label class="field-label" for="te-init-state">Initial State</label>
+              <input id="te-init-state" type="text" class="te-input" placeholder="q0" value="q0" />
+            </div>
+            <div class="te-field">
+              <label class="field-label" for="te-init-stack">Initial Stack Symbol</label>
+              <input id="te-init-stack" type="text" class="te-input" placeholder="Z0" value="Z0" />
+            </div>
+            <div class="te-field">
+              <label class="field-label" for="te-accept-states">Accept States <span style="color:#555">(comma-sep)</span></label>
+              <input id="te-accept-states" type="text" class="te-input" placeholder="q2, q3" />
+            </div>
+          </div>
+
+          <div class="te-divider"></div>
+
+          <!-- Quick-parse area -->
+          <div class="te-section-hdr">
+            <span class="te-section-icon">📋</span>
+            <span>Quick-Parse Textbook Rules</span>
+          </div>
+          <div class="te-paste-hint">One rule per line. Formats accepted:</div>
+          <pre class="te-format-box">q0, a, Z0 -&gt; q0, A Z0
+q0, b, A  -&gt; q1, ε
+q1, ε, Z0 -&gt; q2, Z0</pre>
+          <textarea id="te-paste" class="te-paste-area" rows="6" placeholder="Paste textbook transitions here…"></textarea>
+          <button class="btn btn-ghost te-parse-btn" onclick="parsePastedRules()">↳ Parse &amp; Add Rows</button>
+
+          <div class="te-divider"></div>
+
+          <!-- Load from preset button -->
+          <div class="te-section-hdr">
+            <span class="te-section-icon">↓</span>
+            <span>Load a Built-in Preset</span>
+          </div>
+          <select id="te-preset-select" class="builder-select">
+            <option value="">— choose —</option>
+            <option value="anbn">aⁿbⁿ</option>
+            <option value="paren">Balanced Parens</option>
+            <option value="anb2n">aⁿb²ⁿ</option>
+            <option value="wcwr">wcwᴿ</option>
+            <option value="anbmcnpm">aⁿbᵐcⁿ⁺ᵐ</option>
+            <option value="anbncm">aⁿbⁿ⁺ᵐcᵐ</option>
+            <option value="anmbmcn">aⁿ⁺ᵐbᵐcⁿ</option>
+          </select>
+          <button class="btn btn-ghost te-parse-btn" style="margin-top:6px" onclick="loadTableFromPreset(document.getElementById('te-preset-select').value)">↳ Load Preset into Table</button>
+
+          <div class="te-divider"></div>
+
+          <!-- Actions -->
+          <div style="margin-bottom:12px;">
+            <label class="te-meta-label" for="te-test-string">Test String (optional)</label>
+            <input type="text" id="te-test-string" class="te-input" placeholder="e.g. aabb" spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="te-actions">
+            <button class="btn btn-primary" onclick="compileAndLoadTable()">▶ Compile &amp; Simulate</button>
+            <button class="btn btn-ghost" onclick="clearTableEditor()">↺ Clear All</button>
+            <button class="btn btn-ghost" onclick="exportTableJSON()">↓ Export JSON</button>
+          </div>
+
+          <div id="te-status" class="te-status"></div>
+        </div>
+
+        <!-- Right table panel -->
+        <div class="te-table-panel">
+          <div class="te-table-header-row">
+            <div>
+              <h2 class="te-table-title">Transition Rules</h2>
+              <p class="te-table-sub">δ(From, Input, StackTop) → (To, Push)</p>
+            </div>
+            <div class="te-table-counter" id="te-row-counter">0 rules</div>
+          </div>
+
+          <div class="te-table-scroll">
+            <table class="te-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>From State</th>
+                  <th>Input <span class="th-sub">(ε ok)</span></th>
+                  <th>Stack Top</th>
+                  <th>→ To State</th>
+                  <th>Push <span class="th-sub">(space-sep, ε=pop)</span></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="te-tbody"></tbody>
+            </table>
+          </div>
+          <button class="te-add-btn" onclick="addTableRow()">+ Add Transition Row</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════ JSON EDITOR PANEL ═══════════════════ -->
     <section id="panel-editor" class="tab-panel" role="tabpanel" aria-labelledby="tab-editor-btn">
       <div class="editor-wrap">
         <div class="editor-header-row">
           <div>
-            <h2 class="editor-title">Transition Editor</h2>
-            <p class="editor-sub">Edit the PDA's transition rules directly using JSON. Changes are applied to the simulator instantly.</p>
+            <h2 class="editor-title">JSON Editor <span class="editor-badge">Advanced</span></h2>
+            <p class="editor-sub">Edit the PDA's full configuration as JSON. Changes are applied to the simulator instantly.</p>
           </div>
           <div class="editor-actions">
             <button class="btn btn-ghost" onclick="applyEditorChanges()">Apply Changes</button>
@@ -258,17 +422,16 @@
               <span>transitions.json</span>
               <div class="editor-dots"><span></span><span></span><span></span></div>
             </div>
-            <textarea id="json-editor" class="json-editor" spellcheck="false" placeholder="Loading..."></textarea>
+            <textarea id="json-editor" class="json-editor" spellcheck="false" placeholder="Loading…"></textarea>
             <div id="editor-status" class="editor-status"></div>
           </div>
           <div class="editor-doc">
             <h3>Schema Reference</h3>
             <pre class="schema-box">{
   "name": "Language name",
-  "description": "Description",
-  "states": ["q0", "q1", "q2"],
-  "inputAlphabet": ["a", "b"],
-  "stackAlphabet": ["A", "Z0"],
+  "states": ["q0","q1","q2"],
+  "inputAlphabet": ["a","b"],
+  "stackAlphabet": ["A","Z0"],
   "initialState": "q0",
   "initialStack": "Z0",
   "acceptStates": ["q2"],
@@ -278,13 +441,14 @@
       "input": "a",
       "stackTop": "Z0",
       "to": "q0",
-      "push": "AZ0"
+      "push": "A Z0"
     }
   ],
-  "examples": ["aabb", "ab"]
+  "examples": ["aabb","ab"]
 }</pre>
             <div class="doc-note">
-              <strong>push</strong> field: The string to push onto the stack after popping the current top. Left character ends up on top. Use <code>"ε"</code> or <code>""</code> for pop without push.
+              <strong>push</strong> field: Space-separated tokens. Left token ends up on top.
+              Use <code>"ε"</code> or <code>""</code> for pop-only.
             </div>
           </div>
         </div>
@@ -294,9 +458,9 @@
   </main>
 
   <footer class="site-footer">
-    <span>PDA Simulator · Built for learning Formal Language Theory</span>
+    <span>PDA Simulator · Universal NPDA Engine</span>
     <span class="footer-sep">·</span>
-    <span>Pushdown Automata accept all Context-Free Languages</span>
+    <span>7 built-in languages · Table Editor · String Builder</span>
   </footer>
 
   <script src="pda.js"></script>
