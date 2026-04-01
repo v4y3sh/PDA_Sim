@@ -789,6 +789,12 @@ function loadTableFromPreset(key) {
   document.getElementById('te-init-state').value = config.initialState;
   document.getElementById('te-init-stack').value = config.initialStack;
   document.getElementById('te-accept-states').value = config.acceptStates.join(', ');
+  
+  if (config.examples && config.examples.length > 0) {
+    const teTestString = document.getElementById('te-test-string');
+    if (teTestString) teTestString.value = config.examples[0];
+  }
+
   config.transitions.forEach(t => addTableRow({
     from: t.from,
     input: t.input,
