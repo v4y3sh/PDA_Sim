@@ -112,11 +112,14 @@
         <!-- State diagram -->
         <div class="viz-block" id="viz-diagram">
           <div class="viz-header">
-            <span class="viz-label">State Diagram</span>
-            <span class="viz-hint" id="diagram-hint">Select a language to begin</span>
+            <div>
+              <span class="viz-label">State Diagram</span>
+              <span class="viz-hint" id="diagram-hint" style="margin-left: 8px;">Select a language to begin</span>
+            </div>
+            <button class="btn-icon" onclick="toggleCanvasExpand()" title="Expand/Shrink Canvas" style="width:28px; height:28px; font-size:1rem; padding:0; display:flex; align-items:center; justify-content:center;">⛶</button>
           </div>
-          <div class="canvas-wrap">
-            <canvas id="state-canvas" width="680" height="280"></canvas>
+          <div class="canvas-wrap" id="canvas-wrap">
+            <canvas id="state-canvas"></canvas>
           </div>
         </div>
 

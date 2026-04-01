@@ -519,11 +519,51 @@ function getNodePositions(states, W, H) {
   return positions;
 }
 
+let isCanvasExpanded = false;
+function toggleCanvasExpand() {
+  const block = document.getElementById('viz-diagram');
+  if (!block) return;
+  isCanvasExpanded = !isCanvasExpanded;
+  block.classList.toggle('expanded', isCanvasExpanded);
+  setTimeout(() => {
+    let stepToRender = null;
+    if (trace && trace.length > 0) {
+      stepToRender = traceIndex > 0 ? trace[traceIndex - 1] : trace[0];
+    }
+    renderCanvas(stepToRender);
+  }, 20);
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('panel-sim') && document.getElementById('panel-sim').classList.contains('active')) {
+    let stepToRender = null;
+    if (trace && trace.length > 0) {
+      stepToRender = traceIndex > 0 ? trace[traceIndex - 1] : trace[0];
+    }
+    renderCanvas(stepToRender);
+  }
+});
+
 function renderCanvas(step) {
   const canvas = document.getElementById('state-canvas');
   if (!canvas || !currentPDA) return;
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  
+  const wrap = document.getElementById('canvas-wrap');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = wrap ? wrap.getBoundingClientRect() : { width: 680, height: 280 };
+  
+  const W_css = wrap ? rect.width : 680;
+  const H_css = isCanvasExpanded && wrap ? rect.height : 280;
+
+  canvas.style.width = W_css + 'px';
+  canvas.style.height = H_css + 'px';
+  canvas.width = W_css * dpr;
+  canvas.height = H_css * dpr;
+  
+  ctx.scale(dpr, dpr);
+  const W = W_css, H = H_css;
+
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = getCanvasColors().bg;
   ctx.fillRect(0, 0, W, H);

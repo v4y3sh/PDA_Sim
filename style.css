@@ -626,6 +626,25 @@ body {
   overflow: hidden;
 }
 
+.viz-block.expanded {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 50px rgba(0,0,0,0.8);
+  border-width: 2px;
+  border-color: var(--yellow);
+}
+
+.viz-block.expanded .canvas-wrap {
+  flex: 1;
+  height: 100%;
+}
+
 .viz-header {
   display: flex;
   align-items: center;
