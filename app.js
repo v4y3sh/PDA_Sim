@@ -38,7 +38,6 @@ function switchTab(name) {
   const btn = document.getElementById(`tab-${name}-btn`);
   if (panel) panel.classList.add('active');
   if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected', 'true'); }
-  if (name === 'editor') renderEditor();
   if (name === 'table') initTableEditorIfEmpty();
 }
 
@@ -934,52 +933,7 @@ function exportTableJSON() {
   a.click();
 }
 
-// ════════════════ JSON EDITOR ═════════════════════
-
-function renderEditor() {
-  if (!currentPDA) return;
-  const ta = document.getElementById('json-editor');
-  const config = PDA_PRESETS[currentPreset] || {
-    name: currentPDA.name,
-    states: currentPDA.states,
-    inputAlphabet: currentPDA.inputAlphabet,
-    stackAlphabet: currentPDA.stackAlphabet,
-    initialState: currentPDA.initialState,
-    initialStack: currentPDA.initialStack,
-    acceptStates: currentPDA.acceptStates,
-    transitions: currentPDA.transitions,
-    examples: currentPDA.examples,
-  };
-  // Exclude generator functions from JSON output
-  const { generator, needsM, needsW, ...rest } = config;
-  ta.value = JSON.stringify(rest, null, 2);
-  const es = document.getElementById('editor-status');
-  if (es) { es.textContent = ''; es.className = 'editor-status'; }
-}
-
-function applyEditorChanges() {
-  const ta = document.getElementById('json-editor');
-  const status = document.getElementById('editor-status');
-  try {
-    const raw = JSON.parse(ta.value);
-    const required = ['name', 'states', 'inputAlphabet', 'stackAlphabet', 'initialState', 'initialStack', 'acceptStates', 'transitions'];
-    const missing = required.filter(k => !(k in raw));
-    if (missing.length) throw new Error(`Missing fields: ${missing.join(', ')}`);
-
-    if (currentPreset && PDA_PRESETS[currentPreset]) {
-      PDA_PRESETS[currentPreset] = { ...PDA_PRESETS[currentPreset], ...raw };
-    }
-    currentPDA = new PDA(raw);
-    renderPDATuple(raw);
-    resetSimulation();
-    renderCanvas(null);
-    status.textContent = '✓ Changes applied successfully!';
-    status.className = 'editor-status ok';
-  } catch (e) {
-    status.textContent = '✗ Error: ' + e.message;
-    status.className = 'editor-status err';
-  }
-}
+// JSON Editor functions removed
 
 function toggleTheme() {
   document.body.classList.toggle('light-mode');

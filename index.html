@@ -22,11 +22,10 @@
         </div>
       </div>
       <nav class="tab-nav" role="tablist" aria-label="Main navigation">
-        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Theme">☀️</button>
         <button class="tab-btn active" id="tab-sim-btn" role="tab" aria-selected="true" aria-controls="panel-sim" onclick="switchTab('sim')">Simulator</button>
         <button class="tab-btn" id="tab-learn-btn" role="tab" aria-selected="false" aria-controls="panel-learn" onclick="switchTab('learn')">Learn PDA</button>
         <button class="tab-btn" id="tab-table-btn" role="tab" aria-selected="false" aria-controls="panel-table" onclick="switchTab('table')">Table Editor</button>
-        <button class="tab-btn" id="tab-editor-btn" role="tab" aria-selected="false" aria-controls="panel-editor" onclick="switchTab('editor')">JSON Editor</button>
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode" aria-label="Toggle Theme" style="margin-left: 12px; margin-right: 0;">☀️</button>
       </nav>
     </div>
   </header>
@@ -99,24 +98,10 @@
           </div>
         </div>
 
-        <!-- Card 03: Controls -->
-        <div class="card" id="controls-card">
-          <h2 class="card-title"><span class="pill">03</span> Controls</h2>
-          <div class="speed-row">
-            <label class="field-label" for="speed-range">Speed</label>
-            <input type="range" id="speed-range" min="1" max="5" value="2" class="speed-slider" oninput="updateSpeed(this.value)" />
-            <span id="speed-label" class="speed-val">Normal</span>
-          </div>
-          <div class="ctrl-btns">
-            <button class="btn btn-primary" id="btn-run"   onclick="runSimulation()">▶ Run</button>
-            <button class="btn btn-ghost"   id="btn-pause" onclick="pauseSimulation()" disabled>⏸ Pause</button>
-            <button class="btn btn-ghost"   id="btn-step"  onclick="stepOnce()">⏭ Step</button>
-            <button class="btn btn-ghost"   id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
-          </div>
-          <div id="status-bar" class="status-bar status-idle">
-            <span id="status-icon">◈</span>
-            <span id="status-text">Ready — load a preset or use the String Builder.</span>
-          </div>
+        <!-- Card 03: PDA 7-Tuple -->
+        <div class="card" id="pda-tuple-card">
+          <h2 class="card-title"><span class="pill">03</span> PDA 7-Tuple</h2>
+          <div id="pda-tuple-display" class="tuple-display"></div>
         </div>
 
 
@@ -172,15 +157,31 @@
 
       <!-- Right sidebar: log + tuple -->
       <aside class="sidebar-right">
+        <!-- Card 04: Controls -->
+        <div class="card" id="controls-card">
+          <h2 class="card-title"><span class="pill">04</span> Controls</h2>
+          <div class="speed-row">
+            <label class="field-label" for="speed-range">Speed</label>
+            <input type="range" id="speed-range" min="1" max="5" value="2" class="speed-slider" oninput="updateSpeed(this.value)" />
+            <span id="speed-label" class="speed-val">Normal</span>
+          </div>
+          <div class="ctrl-btns">
+            <button class="btn btn-primary" id="btn-run"   onclick="runSimulation()">▶ Run</button>
+            <button class="btn btn-ghost"   id="btn-pause" onclick="pauseSimulation()" disabled>⏸ Pause</button>
+            <button class="btn btn-ghost"   id="btn-step"  onclick="stepOnce()">⏭ Step</button>
+            <button class="btn btn-ghost"   id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
+          </div>
+          <div id="status-bar" class="status-bar status-idle">
+            <span id="status-icon">◈</span>
+            <span id="status-text">Ready — load a preset or use the String Builder.</span>
+          </div>
+        </div>
+        <!-- Card 05: Computation Path -->
         <div class="card" id="log-card">
-          <h2 class="card-title"><span class="pill">04</span> Computation Path</h2>
+          <h2 class="card-title"><span class="pill">05</span> Computation Path</h2>
           <div class="log-body" id="step-log">
             <p class="log-idle">Computation steps will appear here.</p>
           </div>
-        </div>
-        <div class="card" id="pda-tuple-card">
-          <h2 class="card-title"><span class="pill">05</span> PDA 7-Tuple</h2>
-          <div id="pda-tuple-display" class="tuple-display"></div>
         </div>
       </aside>
 
@@ -403,57 +404,7 @@ q1, ε, Z0 -&gt; q2, Z0</pre>
       </div>
     </section>
 
-    <!-- ═══════════════════ JSON EDITOR PANEL ═══════════════════ -->
-    <section id="panel-editor" class="tab-panel" role="tabpanel" aria-labelledby="tab-editor-btn">
-      <div class="editor-wrap">
-        <div class="editor-header-row">
-          <div>
-            <h2 class="editor-title">JSON Editor <span class="editor-badge">Advanced</span></h2>
-            <p class="editor-sub">Edit the PDA's full configuration as JSON. Changes are applied to the simulator instantly.</p>
-          </div>
-          <div class="editor-actions">
-            <button class="btn btn-ghost" onclick="applyEditorChanges()">Apply Changes</button>
-            <button class="btn btn-primary" onclick="switchTab('sim')">▶ Go to Simulator</button>
-          </div>
-        </div>
-        <div class="editor-grid">
-          <div class="editor-pane">
-            <div class="editor-pane-header">
-              <span>transitions.json</span>
-              <div class="editor-dots"><span></span><span></span><span></span></div>
-            </div>
-            <textarea id="json-editor" class="json-editor" spellcheck="false" placeholder="Loading…"></textarea>
-            <div id="editor-status" class="editor-status"></div>
-          </div>
-          <div class="editor-doc">
-            <h3>Schema Reference</h3>
-            <pre class="schema-box">{
-  "name": "Language name",
-  "states": ["q0","q1","q2"],
-  "inputAlphabet": ["a","b"],
-  "stackAlphabet": ["A","Z0"],
-  "initialState": "q0",
-  "initialStack": "Z0",
-  "acceptStates": ["q2"],
-  "transitions": [
-    {
-      "from": "q0",
-      "input": "a",
-      "stackTop": "Z0",
-      "to": "q0",
-      "push": "A Z0"
-    }
-  ],
-  "examples": ["aabb","ab"]
-}</pre>
-            <div class="doc-note">
-              <strong>push</strong> field: Space-separated tokens. Left token ends up on top.
-              Use <code>"ε"</code> or <code>""</code> for pop-only.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Editor removed -->
 
   </main>
 
