@@ -7,6 +7,8 @@ An interactive Pushdown Automaton (PDA) Simulator built with pure HTML, CSS, and
 ## Tabs
 
 - **Simulator** — Run, Pause, Step, and step back through PDA computations with live state diagram, input tape, and stack visualization
+  <img width="1440" height="812" alt="image" src="https://github.com/user-attachments/assets/79833eaa-beda-4e20-9367-f0291a3c9d06" />
+
 - **Learn PDA** — Theory reference covering formal definition, acceptance methods (final state & empty stack), ε-transitions, and classic language walkthroughs
 - **Table Editor** — Build or edit a custom PDA rule-by-rule with ε-insert support and textbook quick-parse
 
