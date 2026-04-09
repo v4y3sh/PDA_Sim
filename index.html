@@ -172,16 +172,24 @@
             <button class="btn btn-primary" id="btn-run"   onclick="runSimulation()">▶ Run</button>
             <button class="btn btn-ghost"   id="btn-pause" onclick="pauseSimulation()" disabled>⏸ Pause</button>
             <button class="btn btn-ghost"   id="btn-step"  onclick="stepOnce()">⏭ Step</button>
-            <button class="btn btn-ghost"   id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
+            <button class="btn btn-ghost"   id="btn-prev"  onclick="stepBack()">⏮ Prev</button>
+            <button class="btn btn-ghost ctrl-reset-btn" id="btn-reset" onclick="resetSimulation()">↺ Reset</button>
           </div>
           <div id="status-bar" class="status-bar status-idle">
             <span id="status-icon">◈</span>
             <span id="status-text">Ready — load a preset or use the String Builder.</span>
           </div>
         </div>
-        <!-- Card 05: Computation Path -->
+        <!-- Card 05: Transition Functions -->
+        <div class="card" id="transitions-card">
+          <h2 class="card-title"><span class="pill">05</span> Transition Functions</h2>
+          <div class="tfn-body" id="tfn-body">
+            <p class="log-idle">Run a simulation to see compiled transition functions.</p>
+          </div>
+        </div>
+        <!-- Card 06: Computation Path -->
         <div class="card" id="log-card">
-          <h2 class="card-title"><span class="pill">05</span> Computation Path</h2>
+          <h2 class="card-title"><span class="pill">06</span> Computation Path</h2>
           <div class="log-body" id="step-log">
             <p class="log-idle">Computation steps will appear here.</p>
           </div>
@@ -239,6 +247,96 @@
               <tr><td>aⁿbⁿ</td><td>❌</td><td>✅</td></tr>
               <tr><td>wcwᴿ</td><td>❌</td><td>✅</td></tr>
             </table>
+          </div>
+        </div>
+
+        <!-- Acceptance Methods Section -->
+        <div class="learn-section">
+          <h3 class="section-title">Acceptance Methods</h3>
+          <p style="font-size:0.85rem; color:var(--white-dim); margin-bottom:18px">In PDA theory, string acceptance determines whether a string belongs to the language. There are two equivalently powerful but conceptually distinct methods.</p>
+          <div class="example-langs">
+            <div class="example-lang-card acceptance-card">
+              <div class="acceptance-card-badge badge-final">Method 1</div>
+              <h4>Acceptance by Final State (L(P))</h4>
+              <p>A PDA accepts a string if, after consuming the entire input, it is in one of the designated <strong>final states</strong> (F). The stack contents are completely ignored.</p>
+              <p style="margin-top:10px"><strong>Formal Definition:</strong></p>
+              <div class="acceptance-formula">L(P) = { w | (q₀, w, Z₀) ⊢* (q<sub>f</sub>, ε, x), q<sub>f</sub> ∈ F }</div>
+              <p style="margin-top:10px"><strong>Key Points:</strong></p>
+              <ul class="formal-list">
+                <li>Final state <strong>q<sub>f</sub></strong> must be in F</li>
+                <li>Stack can contain <em>any</em> symbols x ∈ Γ*</li>
+                <li>Mimics how Finite Automata accept strings</li>
+                <li>Useful when language structure maps naturally to states</li>
+              </ul>
+              <div class="acceptance-example-box">
+                <div class="aex-label">Simulation Example — L = { aⁿbⁿ | n ≥ 1 }</div>
+                <div class="aex-steps">
+                  <div class="aex-step"><span class="aex-num">1</span><span>Start at q₀, stack = [Z₀]</span></div>
+                  <div class="aex-step"><span class="aex-num">2</span><span>Read each 'a' → push A onto stack</span></div>
+                  <div class="aex-step"><span class="aex-num">3</span><span>Read each 'b' → pop A from stack</span></div>
+                  <div class="aex-step"><span class="aex-num">4</span><span>ε-transition when stack top = Z₀ → move to q<sub>f</sub></span></div>
+                  <div class="aex-step aex-accept"><span class="aex-num">✓</span><span>Halt at q<sub>f</sub> ∈ F — ACCEPTED by Final State</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="example-lang-card acceptance-card">
+              <div class="acceptance-card-badge badge-empty">Method 2</div>
+              <h4>Acceptance by Empty Stack (N(P))</h4>
+              <p>A PDA accepts a string if, after consuming the entire input, the stack is <strong>completely empty</strong> (often called the "null" or initial state of the stack). The current state is irrelevant.</p>
+              <p style="margin-top:10px"><strong>Formal Definition:</strong></p>
+              <div class="acceptance-formula">N(P) = { w | (q₀, w, Z₀) ⊢* (q, ε, ε), q ∈ Q }</div>
+              <p style="margin-top:10px"><strong>Key Points:</strong></p>
+              <ul class="formal-list">
+                <li>Stack must be <strong>empty</strong> (ε) after all input consumed</li>
+                <li>Final state is <em>irrelevant</em> — any state q ∈ Q works</li>
+                <li>Often simpler for languages where symbols must be matched exactly</li>
+                <li>ε-transitions are crucial for "cleaning" the stack bottom Z₀</li>
+              </ul>
+              <div class="acceptance-example-box">
+                <div class="aex-label">Simulation Example — L = { aⁿbⁿ | n ≥ 1 }</div>
+                <div class="aex-steps">
+                  <div class="aex-step"><span class="aex-num">1</span><span>Start at q₀, stack = [Z₀]</span></div>
+                  <div class="aex-step"><span class="aex-num">2</span><span>Read each 'a' → push A (stack grows)</span></div>
+                  <div class="aex-step"><span class="aex-num">3</span><span>Read each 'b' → pop A (stack shrinks)</span></div>
+                  <div class="aex-step"><span class="aex-num">4</span><span>ε-transition on Z₀ → pop Z₀ (stack now empty)</span></div>
+                  <div class="aex-step aex-accept"><span class="aex-num">✓</span><span>Stack = ∅ — ACCEPTED by Empty Stack</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="acceptance-comparison">
+            <h4 class="acceptance-comparison-title">Key Differences Summary</h4>
+            <table class="compare-table" style="margin-top:0">
+              <tr><th>Feature</th><th>Empty Stack (N(P))</th><th>Final State (L(P))</th></tr>
+              <tr><td>Acceptance Criteria</td><td>Stack is empty (ε)</td><td>Machine is in q<sub>f</sub> ∈ F</td></tr>
+              <tr><td>Stack Content</td><td>Must be empty</td><td>Irrelevant (any x ∈ Γ*)</td></tr>
+              <tr><td>Final State</td><td>Irrelevant (any q ∈ Q)</td><td>Must be in F ⊆ Q</td></tr>
+              <tr><td>Equivalence</td><td>Yes (CFLs)</td><td>Yes (CFLs)</td></tr>
+            </table>
+            <p style="font-size:0.8rem; color:var(--white-dim); margin-top:12px">⚡ <strong>Theorem:</strong> Both acceptance methods are <em>equivalent</em> in expressive power — every CFL accepted by one method can be accepted by the other. A PDA accepting by final state can always be converted to one accepting by empty stack, and vice versa.</p>
+          </div>
+        </div>
+
+        <!-- ε-Transition Section -->
+        <div class="learn-section">
+          <h3 class="section-title">ε-Transitions (Epsilon Moves)</h3>
+          <div class="example-langs">
+            <div class="example-lang-card">
+              <h4>What is an ε-Transition?</h4>
+              <p>An ε-transition (epsilon move) allows the PDA to change state or manipulate the stack <strong>without consuming any input symbol</strong>. It is a "free move" purely driven by the stack top.</p>
+              <p style="margin-top:8px"><strong>Notation:</strong> <code>δ(q₁, ε, Z₀) = (q<sub>f</sub>, ε)</code></p>
+              <p style="margin-top:8px">This means: from state q₁, if stack top = Z₀, move to q<sub>f</sub> and pop Z₀ — without reading any input.</p>
+            </div>
+            <div class="example-lang-card">
+              <h4>Role in Acceptance</h4>
+              <p>ε-transitions are <strong>critical</strong> for bridging between acceptance methods:</p>
+              <ul class="formal-list" style="margin-top:8px">
+                <li><strong>Final State PDA:</strong> Use ε-transition from matching state to q<sub>f</sub></li>
+                <li><strong>Empty Stack PDA:</strong> Use ε-transitions at end to pop remaining stack symbols</li>
+                <li><strong>Phase Switching:</strong> Move between phases (push → pop) without consuming input</li>
+                <li><strong>Multi-phase PDAs:</strong> ε-transitions connect computation phases cleanly</li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -382,7 +480,10 @@ q1, ε, Z0 -&gt; q2, Z0</pre>
               <h2 class="te-table-title">Transition Rules</h2>
               <p class="te-table-sub">δ(From, Input, StackTop) → (To, Push)</p>
             </div>
-            <div class="te-table-counter" id="te-row-counter">0 rules</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="te-eps-btn" onclick="insertEpsilonToFocusedCell()" title="Insert ε into the focused cell">ε Insert</button>
+              <div class="te-table-counter" id="te-row-counter">0 rules</div>
+            </div>
           </div>
 
           <div class="te-table-scroll">

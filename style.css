@@ -200,7 +200,7 @@ body {
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
-  padding: 20px 20px 0;
+  padding: 20px 24px 24px;
 }
 
 .tab-panel {
@@ -211,6 +211,7 @@ body {
   display: flex;
   gap: 16px;
   min-height: calc(100vh - 130px);
+  padding-bottom: 20px;
 }
 
 /* ══════════ SIDEBAR CARDS ══════════ */
@@ -225,6 +226,7 @@ body {
 
 .sidebar-right {
   width: 260px;
+  padding-right: 4px;
 }
 
 .card {
@@ -471,9 +473,9 @@ body {
 
 .ctrl-btns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .btn {
@@ -1732,3 +1734,180 @@ body {
   .te-wrap { flex-direction: column; height: auto; overflow: visible; }
   .te-meta-panel { width: 100%; }
 }
+
+/* ── Controls: full-width Reset ── */
+.ctrl-reset-btn {
+  grid-column: 1 / -1; /* full width */
+}
+
+/* ── Transition Functions Card ── */
+.tfn-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tfn-row {
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  padding: 5px 8px;
+  border-radius: var(--r-sm);
+  border-left: 3px solid var(--border);
+  background: var(--bg3);
+  color: var(--white-dim);
+  transition: all 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tfn-row.tfn-active {
+  border-left-color: var(--yellow);
+  color: var(--yellow);
+  background: rgba(255, 214, 10, 0.07);
+  box-shadow: 0 0 8px rgba(255, 214, 10, 0.1);
+}
+
+/* ── Table Editor: Epsilon Insert Button ── */
+.te-eps-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 214, 10, 0.3);
+  color: var(--yellow-dim);
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+.te-eps-btn:hover {
+  background: rgba(255, 214, 10, 0.1);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  box-shadow: 0 0 10px rgba(255, 214, 10, 0.15);
+}
+
+/* ── Learn Panel: Acceptance Methods ── */
+.acceptance-card {
+  position: relative;
+  padding-top: 44px !important;
+}
+
+.acceptance-card-badge {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  font-family: var(--font-code);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.badge-final {
+  background: rgba(57, 211, 83, 0.15);
+  color: var(--green);
+  border: 1px solid rgba(57, 211, 83, 0.3);
+}
+
+.badge-empty {
+  background: rgba(88, 166, 255, 0.15);
+  color: var(--blue);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+}
+
+.acceptance-formula {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--yellow);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  color: var(--yellow);
+  margin: 8px 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.acceptance-example-box {
+  background: rgba(255, 214, 10, 0.04);
+  border: 1px solid rgba(255, 214, 10, 0.15);
+  border-radius: var(--r-md);
+  padding: 12px;
+  margin-top: 14px;
+}
+
+.aex-label {
+  font-family: var(--font-code);
+  font-size: 0.68rem;
+  color: var(--yellow-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.aex-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.aex-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--white-dim);
+}
+
+.aex-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-family: var(--font-code);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--white-dim);
+  flex-shrink: 0;
+}
+
+.aex-step.aex-accept {
+  color: var(--green);
+}
+
+.aex-step.aex-accept .aex-num {
+  background: rgba(57, 211, 83, 0.15);
+  border-color: rgba(57, 211, 83, 0.4);
+  color: var(--green);
+}
+
+.acceptance-comparison {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  margin-top: 16px;
+}
+
+.acceptance-comparison-title {
+  font-family: var(--font-code);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--yellow);
+  margin-bottom: 12px;
+}
+

@@ -201,15 +201,15 @@ const PDA_PRESETS = {
   anbn: {
     name: "aⁿbⁿ", fullName: "L = { aⁿbⁿ | n ≥ 1 }",
     description: "Equal number of a's followed by equal number of b's.",
-    states: ["q0","q1","q2"], inputAlphabet: ["a","b"], stackAlphabet: ["A","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q2"],
-    phases: { "q0":"Phase 1 — Pushing A for each 'a'", "q1":"Phase 2 — Popping A for each 'b'", "q2":"✓ Accepted — Equal a's and b's" },
+    states: ["q0","q1","qf"], inputAlphabet: ["a","b"], stackAlphabet: ["A","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Phase 1 — Pushing A for each 'a'", "q1":"Phase 2 — Popping A for each 'b'", "qf":"✓ Accepted — Equal a's and b's" },
     transitions: [
       { from:"q0", input:"a", stackTop:"Z0", to:"q0", push:"A Z0" },
       { from:"q0", input:"a", stackTop:"A",  to:"q0", push:"A A" },
       { from:"q0", input:"b", stackTop:"A",  to:"q1", push:"" },
       { from:"q1", input:"b", stackTop:"A",  to:"q1", push:"" },
-      { from:"q1", input:"ε", stackTop:"Z0", to:"q2", push:"Z0" },
+      { from:"q1", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["ab","aabb","aaabbb","aaaabbbb"],
     needsM: false, needsW: false,
@@ -220,14 +220,14 @@ const PDA_PRESETS = {
   paren: {
     name: "( )", fullName: "Balanced Parentheses",
     description: "Correctly nested and balanced parentheses.",
-    states: ["q0","q1"], inputAlphabet: ["(", ")"], stackAlphabet: ["P","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q1"],
-    phases: { "q0":"Tracking open parentheses", "q1":"✓ Accepted — All parentheses balanced" },
+    states: ["q0","qf"], inputAlphabet: ["(", ")"], stackAlphabet: ["P","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Tracking open parentheses", "qf":"✓ Accepted — All parentheses balanced" },
     transitions: [
       { from:"q0", input:"(", stackTop:"Z0", to:"q0", push:"P Z0" },
       { from:"q0", input:"(", stackTop:"P",  to:"q0", push:"P P" },
       { from:"q0", input:")", stackTop:"P",  to:"q0", push:"" },
-      { from:"q0", input:"ε", stackTop:"Z0", to:"q1", push:"Z0" },
+      { from:"q0", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["()","(())","(()())","((()))"],
     needsM: false, needsW: false,
@@ -238,9 +238,9 @@ const PDA_PRESETS = {
   anbmcnpm: {
     name: "aⁿbᵐcⁿ⁺ᵐ", fullName: "L = { aⁿbᵐcⁿ⁺ᵐ | n, m ≥ 1 }",
     description: "Push A per 'a', push B per 'b', pop one per 'c'. Total c's = n+m.",
-    states: ["q0","q1","q2","q3"], inputAlphabet: ["a","b","c"], stackAlphabet: ["A","B","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q3"],
-    phases: { "q0":"Phase 1 — Pushing A for each 'a'", "q1":"Phase 2 — Pushing B for each 'b'", "q2":"Phase 3 — Popping for each 'c' (n+m pops)", "q3":"✓ Accepted — c's matched n+m" },
+    states: ["q0","q1","q2","qf"], inputAlphabet: ["a","b","c"], stackAlphabet: ["A","B","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Phase 1 — Pushing A for each 'a'", "q1":"Phase 2 — Pushing B for each 'b'", "q2":"Phase 3 — Popping for each 'c' (n+m pops)", "qf":"✓ Accepted — c's matched n+m" },
     transitions: [
       { from:"q0", input:"a", stackTop:"Z0", to:"q0", push:"A Z0" },
       { from:"q0", input:"a", stackTop:"A",  to:"q0", push:"A A" },
@@ -253,7 +253,7 @@ const PDA_PRESETS = {
       { from:"q1", input:"c", stackTop:"B",  to:"q2", push:"" },
       { from:"q2", input:"c", stackTop:"A",  to:"q2", push:"" },
       { from:"q2", input:"c", stackTop:"B",  to:"q2", push:"" },
-      { from:"q2", input:"ε", stackTop:"Z0", to:"q3", push:"Z0" },
+      { from:"q2", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["abcc","aabccc","abbccc","aabbcccc"],
     needsM: true, needsW: false,
@@ -264,21 +264,21 @@ const PDA_PRESETS = {
   anbncm: {
     name: "aⁿbⁿ⁺ᵐcᵐ", fullName: "L = { aⁿbⁿ⁺ᵐcᵐ | n ≥ 1, m ≥ 0 }",
     description: "First n b's match a's. Extra m b's verified by m c's.",
-    states: ["q0","q1","q2","q3","q4"], inputAlphabet: ["a","b","c"], stackAlphabet: ["A","B","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q4"],
-    phases: { "q0":"Phase 1 — Pushing A for each 'a'", "q1":"Phase 2 — Popping A for each 'b' (n match)", "q2":"Phase 3 — Pushing B for extra b's (m count)", "q3":"Phase 4 — Popping B for each 'c'", "q4":"✓ Accepted" },
+    states: ["q0","q1","q2","q3","qf"], inputAlphabet: ["a","b","c"], stackAlphabet: ["A","B","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Phase 1 — Pushing A for each 'a'", "q1":"Phase 2 — Popping A for each 'b' (n match)", "q2":"Phase 3 — Pushing B for extra b's (m count)", "q3":"Phase 4 — Popping B for each 'c'", "qf":"✓ Accepted" },
     transitions: [
       { from:"q0", input:"a", stackTop:"Z0", to:"q0", push:"A Z0" },
       { from:"q0", input:"a", stackTop:"A",  to:"q0", push:"A A" },
       { from:"q0", input:"b", stackTop:"A",  to:"q1", push:"" },
       { from:"q1", input:"b", stackTop:"A",  to:"q1", push:"" },
       { from:"q1", input:"b", stackTop:"Z0", to:"q2", push:"B Z0" },
-      { from:"q1", input:"ε", stackTop:"Z0", to:"q4", push:"Z0" },
+      { from:"q1", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
       { from:"q2", input:"b", stackTop:"Z0", to:"q2", push:"B Z0" },
       { from:"q2", input:"b", stackTop:"B",  to:"q2", push:"B B" },
       { from:"q2", input:"c", stackTop:"B",  to:"q3", push:"" },
       { from:"q3", input:"c", stackTop:"B",  to:"q3", push:"" },
-      { from:"q3", input:"ε", stackTop:"Z0", to:"q4", push:"Z0" },
+      { from:"q3", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["ab","abbc","aabb","aabbbc"],
     needsM: true, needsW: false,
@@ -289,20 +289,20 @@ const PDA_PRESETS = {
   anmbmcn: {
     name: "aⁿ⁺ᵐbᵐcⁿ", fullName: "L = { aⁿ⁺ᵐbᵐcⁿ | n, m ≥ 0 }",
     description: "Push all a's (n+m). Pop m for b's. Pop remaining n for c's.",
-    states: ["q0","q1","q2","q3"], inputAlphabet: ["a","b","c"], stackAlphabet: ["A","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q3"],
-    phases: { "q0":"Phase 1 — Pushing A (counting n+m)", "q1":"Phase 2 — Popping A for each 'b' (m)", "q2":"Phase 3 — Popping A for each 'c' (n)", "q3":"✓ Accepted" },
+    states: ["q0","q1","q2","qf"], inputAlphabet: ["a","b","c"], stackAlphabet: ["A","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Phase 1 — Pushing A (counting n+m)", "q1":"Phase 2 — Popping A for each 'b' (m)", "q2":"Phase 3 — Popping A for each 'c' (n)", "qf":"✓ Accepted" },
     transitions: [
       { from:"q0", input:"a", stackTop:"Z0", to:"q0", push:"A Z0" },
       { from:"q0", input:"a", stackTop:"A",  to:"q0", push:"A A" },
       { from:"q0", input:"b", stackTop:"A",  to:"q1", push:"" },
       { from:"q0", input:"c", stackTop:"A",  to:"q2", push:"" },
-      { from:"q0", input:"ε", stackTop:"Z0", to:"q3", push:"Z0" },
+      { from:"q0", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
       { from:"q1", input:"b", stackTop:"A",  to:"q1", push:"" },
       { from:"q1", input:"c", stackTop:"A",  to:"q2", push:"" },
-      { from:"q1", input:"ε", stackTop:"Z0", to:"q3", push:"Z0" },
+      { from:"q1", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
       { from:"q2", input:"c", stackTop:"A",  to:"q2", push:"" },
-      { from:"q2", input:"ε", stackTop:"Z0", to:"q3", push:"Z0" },
+      { from:"q2", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["ac","ab","aabc","aaabcc"],
     needsM: true, needsW: false,
@@ -315,9 +315,9 @@ const PDA_PRESETS = {
   anb2n: {
     name: "aⁿb²ⁿ", fullName: "L = { aⁿb²ⁿ | n ≥ 1 }",
     description: "Each 'a' pushes 2 A's onto the stack. Each 'b' pops 1. Need exactly 2n b's.",
-    states: ["q0","q1","q2"], inputAlphabet: ["a","b"], stackAlphabet: ["A","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q2"],
-    phases: { "q0":"Phase 1 — Pushing 2×A per 'a' (stack grows to 2n)", "q1":"Phase 2 — Popping 1 A per 'b' (need exactly 2n pops)", "q2":"✓ Accepted — Exactly 2n b's matched" },
+    states: ["q0","q1","qf"], inputAlphabet: ["a","b"], stackAlphabet: ["A","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Phase 1 — Pushing 2×A per 'a' (stack grows to 2n)", "q1":"Phase 2 — Popping 1 A per 'b' (need exactly 2n pops)", "qf":"✓ Accepted — Exactly 2n b's matched" },
     transitions: [
       // Net +2 per 'a': pop 1, push 3 (or pop Z0, push 2+Z0)
       { from:"q0", input:"a", stackTop:"Z0", to:"q0", push:"A A Z0" },
@@ -327,7 +327,7 @@ const PDA_PRESETS = {
       // Continue popping
       { from:"q1", input:"b", stackTop:"A",  to:"q1", push:"" },
       // All A's cleared → accept
-      { from:"q1", input:"ε", stackTop:"Z0", to:"q2", push:"Z0" },
+      { from:"q1", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["abb","aabbbb","aaabbbbbb"],
     needsM: false, needsW: false,
@@ -341,9 +341,9 @@ const PDA_PRESETS = {
   wcwr: {
     name: "wcwᴿ", fullName: "L = { wcwᴿ | w ∈ {a,b}* }",
     description: "Push w onto stack, pass centre 'c', pop and match wᴿ.",
-    states: ["q0","q1","q2"], inputAlphabet: ["a","b","c"], stackAlphabet: ["a","b","Z0"],
-    initialState: "q0", initialStack: "Z0", acceptStates: ["q2"],
-    phases: { "q0":"Phase 1 — Pushing symbols of w", "q1":"Phase 2 — Matching wᴿ by popping", "q2":"✓ Accepted — wcwᴿ verified" },
+    states: ["q0","q1","qf"], inputAlphabet: ["a","b","c"], stackAlphabet: ["a","b","Z0"],
+    initialState: "q0", initialStack: "Z0", acceptStates: ["qf"],
+    phases: { "q0":"Phase 1 — Pushing symbols of w", "q1":"Phase 2 — Matching wᴿ by popping", "qf":"✓ Accepted — wcwᴿ verified" },
     transitions: [
       // Push phase: push input symbol over whatever is on top
       { from:"q0", input:"a", stackTop:"Z0", to:"q0", push:"a Z0" },
@@ -355,12 +355,12 @@ const PDA_PRESETS = {
       // Centre 'c': switch to pop mode, keep stack unchanged
       { from:"q0", input:"c", stackTop:"a",  to:"q1", push:"a" },
       { from:"q0", input:"c", stackTop:"b",  to:"q1", push:"b" },
-      { from:"q0", input:"c", stackTop:"Z0", to:"q2", push:"Z0" }, // w = ε → "c" accepted
+      { from:"q0", input:"c", stackTop:"Z0", to:"qf", push:"Z0" }, // w = ε → "c" accepted
       // Pop phase: pop matching symbols
       { from:"q1", input:"a", stackTop:"a",  to:"q1", push:"" },
       { from:"q1", input:"b", stackTop:"b",  to:"q1", push:"" },
       // All matched → accept
-      { from:"q1", input:"ε", stackTop:"Z0", to:"q2", push:"Z0" },
+      { from:"q1", input:"ε", stackTop:"Z0", to:"qf", push:"Z0" },
     ],
     examples: ["c","abcba","aabcbaa","babcbab"],
     needsM: false, needsW: true,

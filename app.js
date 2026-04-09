@@ -143,6 +143,28 @@ function stepOnce() {
   else setStatus('paused', `Step ${traceIndex}/${trace.length - 1} — press Step or Run to continue`);
 }
 
+function stepBack() {
+  if (!trace.length) return;
+  if (traceIndex <= 1) {
+    setStatus('paused', 'Already at the beginning.');
+    return;
+  }
+  if (animTimer) clearInterval(animTimer);
+  isRunning = false; isPaused = true;
+  traceIndex = Math.max(0, traceIndex - 2);
+  // Remove last log entry
+  const log = document.getElementById('step-log');
+  const entries = log.querySelectorAll('.log-entry');
+  if (entries.length > 0) entries[entries.length - 1].remove();
+  log.querySelectorAll('.log-entry.current').forEach(e => e.classList.remove('current'));
+  const prev = document.getElementById(`log-entry-${traceIndex - 1}`);
+  if (prev) prev.classList.add('current');
+  renderStep(trace[traceIndex]);
+  traceIndex++;
+  updateCtrlButtons();
+  setStatus('paused', `Step ${traceIndex}/${trace.length - 1} — stepped back`);
+}
+
 function resetSimulation() {
   clearInterval(animTimer);
   trace = []; traceIndex = 0; isRunning = false; isPaused = false;
@@ -155,6 +177,8 @@ function resetSimulation() {
   if (expBody) expBody.innerHTML = '<p class="exp-idle">Run the simulation or press Step to see detailed explanations for each transition.</p>';
   const td = document.getElementById('transition-display');
   if (td) td.textContent = '';
+  const tfnBody = document.getElementById('tfn-body');
+  if (tfnBody) tfnBody.innerHTML = '<p class="log-idle">Run a simulation to see compiled transition functions.</p>';
 }
 
 function scheduleNext() {
@@ -180,15 +204,19 @@ function updateCtrlButtons() {
   const btnRun = document.getElementById('btn-run');
   const btnPause = document.getElementById('btn-pause');
   const btnStep = document.getElementById('btn-step');
+  const btnPrev = document.getElementById('btn-prev');
   if (isRunning) {
     btnRun.textContent = '▶ Run'; btnRun.disabled = true;
     btnPause.disabled = false; btnStep.disabled = true;
+    if (btnPrev) btnPrev.disabled = true;
   } else if (isPaused) {
     btnRun.textContent = '▶ Resume'; btnRun.disabled = false;
     btnPause.disabled = true; btnStep.disabled = false;
+    if (btnPrev) btnPrev.disabled = (traceIndex <= 1);
   } else {
     btnRun.textContent = '▶ Run'; btnRun.disabled = false;
     btnPause.disabled = true; btnStep.disabled = false;
+    if (btnPrev) btnPrev.disabled = true;
   }
 }
 
@@ -294,6 +322,7 @@ function renderStep(step) {
   renderStack(step);
   renderExplanation(step);
   renderPhaseIndicator(step);
+  renderTransitionFunctions(step);
 
   const viz = document.querySelector('#viz-diagram');
   if (viz) {
@@ -301,6 +330,26 @@ function renderStep(step) {
     if (step.isAccept) { viz.classList.add('glow-accept'); setStatus('accept', '✓ ACCEPTED — String is in the language!'); }
     if (step.isReject) { viz.classList.add('glow-reject'); setStatus('reject', '✗ REJECTED — String is NOT in the language.'); }
   }
+}
+
+function renderTransitionFunctions(step) {
+  const body = document.getElementById('tfn-body');
+  if (!body || !currentPDA) return;
+  body.innerHTML = '';
+  currentPDA.transitions.forEach(t => {
+    const inp = (t.input === '' || t.input === 'ε') ? 'ε' : t.input;
+    const push = (t.push === '' || t.push === 'ε') ? 'ε' : t.push;
+    const transStr = `δ(${t.from}, ${inp}, ${t.stackTop}) → (${t.to}, ${push})`;
+    const isActive = step && step.transition &&
+      step.transition.from === t.from &&
+      step.transition.to === t.to &&
+      step.transition.input === t.input &&
+      step.transition.stackTop === t.stackTop;
+    const div = document.createElement('div');
+    div.className = 'tfn-row' + (isActive ? ' tfn-active' : '');
+    div.textContent = transStr;
+    body.appendChild(div);
+  });
 }
 
 function clearVisualization() {
@@ -456,7 +505,8 @@ function appendLog(step, idx) {
   entry.title = step.description.replace(/<[^>]+>/g, '');
   entry.onclick = () => renderStep(step);
   log.appendChild(entry);
-  entry.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  // Scroll only within the log container, not the whole page
+  log.scrollTop = log.scrollHeight;
 }
 
 // PDA Tuple sidebar
@@ -696,6 +746,31 @@ function buildTransLabel(t) {
 }
 
 // ════════════════ TABLE EDITOR ════════════════════
+
+/** Insert ε into the last-focused table cell */
+let _lastFocusedTeCell = null;
+document.addEventListener('focusin', e => {
+  if (e.target && e.target.classList.contains('te-cell')) {
+    _lastFocusedTeCell = e.target;
+  }
+});
+
+function insertEpsilonToFocusedCell() {
+  const cell = _lastFocusedTeCell;
+  if (!cell) {
+    // Try to find first visible te-cell and focus
+    const first = document.querySelector('#te-tbody .te-cell');
+    if (first) { first.focus(); first.value = 'ε'; }
+    return;
+  }
+  const start = cell.selectionStart;
+  const end = cell.selectionEnd;
+  const val = cell.value;
+  cell.value = val.slice(0, start) + 'ε' + val.slice(end);
+  cell.selectionStart = cell.selectionEnd = start + 1;
+  cell.focus();
+  cell.dispatchEvent(new Event('input'));
+}
 
 function initTableEditorIfEmpty() {
   const tbody = document.getElementById('te-tbody');
