@@ -1,57 +1,104 @@
-# PDA Simulator — Pushdown Automata Visualizer
+# PDA Simulator — Universal NPDA Engine
 
-An interactive, educational **Pushdown Automaton (PDA) Simulator** built with pure HTML, CSS, and JavaScript. Designed to help students and enthusiasts understand how PDAs work through step-by-step animated visualization.
+An interactive **Pushdown Automaton (PDA) Simulator** built with pure HTML, CSS, and JavaScript. Visualize and step through PDA computations with animated state diagrams, tape, and stack — no build step, no dependencies.
 
-> **Theme:** Yellow · Black · White — Code-editor aesthetic using JetBrains Mono font  
-> **No build step required** — open `index.html` directly in any modern browser.
-
----
-
-## Preview
-
-The simulator features a three-panel layout:
-- **Left sidebar** — Language selection, input controls, configuration
-- **Center** — State diagram canvas, input tape, stack visualization, step explanation
-- **Right sidebar** — Computation path log, PDA 7-tuple breakdown
+> Open `index.html` in any modern browser to run.
 
 ---
 
-## Features
+## Tabs
 
-### Simulator Tab
-| Feature | Description |
+### Simulator
+
+The main workspace. Load a preset language or enter any custom string.
+
+**Left sidebar**
+
+| Panel | Description |
 |---|---|
-| **2 Preset Languages** | `aⁿbⁿ` (equal a's and b's) and Balanced Parentheses — ready to run out of the box |
-| **Custom Input** | Type any string; real-time validation highlights invalid characters |
-| **Quick-fill Buttons** | One-click example strings for each preset language |
-| **Run / Pause / Step / Reset** | Full playback control — run the full animation, pause at any moment, or step one transition at a time |
-| **Speed Control** | 5-level slider from Slow (1.2s/step) to Instant (80ms/step) |
-| **State Diagram Canvas** | Live-rendered HTML5 Canvas showing all states, transitions, self-loops, and transition labels. Active state glows yellow (running), green (accepted), or red (rejected) |
-| **Animated Input Tape** | Shows all input symbols; read symbols are struck through, the current read-head pulses yellow, pending symbols are dimmed |
-| **Stack Visualization** | Each stack symbol rendered in its own box; the top symbol is highlighted in yellow with a glow. Push/pop animations play on every transition |
-| **Step Explanation Panel** | Plain-English description of every transition: what was popped, what was pushed, what input was consumed, and why |
-| **Computation Path Log** | Scrollable history of every `(state, input, stackTop)` triple. Click any entry to replay that step's visualization |
-| **Configuration Table** | Quick-reference showing states, alphabet, stack alphabet, initial state, accept states, and rule count |
-| **PDA 7-Tuple Sidebar** | Formal breakdown of `(Q, Σ, Γ, δ, q₀, Z₀, F)` for the loaded automaton |
-| **Accept / Reject Verdict** | Status bar and full-canvas glow show the final decision when simulation ends |
+| **String Builder** | Select a preset language, set `n`/`m` parameters, and generate valid example strings. Click **⚡ Generate & Run** to run immediately. |
+| **Manual Input** | Type any custom string. Real-time validation highlights invalid characters. Click ▶ to run. |
+| **PDA 7-Tuple** | Live formal definition of the currently loaded automaton — `(Q, Σ, Γ, δ, q₀, Z₀, F)` with row-by-row breakdown. |
 
-### Learn PDA Tab
+**Center panel**
+
+| Panel | Description |
+|---|---|
+| **State Diagram** | HTML5 Canvas rendering of all states and transitions. The active state glows yellow (running), green (accepted), or red (rejected). Fullscreen toggle available. |
+| **Phase Indicator** | Description of the current computation phase (e.g. "Phase 1 — Pushing A for each 'a'"). |
+| **Input Tape** | All input symbols shown as cells. The current read head pulses yellow; consumed symbols are struck through; pending symbols are dimmed. |
+| **Stack** | Each symbol rendered as a block. The top symbol is highlighted. Push/pop animations play on every transition. |
+| **Step Explanation** | Plain-English description of which transition fired, what was consumed, popped, and pushed. |
+
+**Right sidebar**
+
+| Card | Description |
+|---|---|
+| **04 Controls** | **▶ Run** — animate the full simulation at the selected speed. **⏸ Pause** — pause mid-run. **⏭ Step** — advance one transition. **⏮ Prev** — step backward through the trace. **↺ Reset** (full-width) — clear everything. Speed slider: Slow → Instant (5 levels). |
+| **05 Transition Functions** | Lists all compiled `δ(from, input, stackTop) → (to, push)` rules for the loaded PDA. The currently executing rule is highlighted in yellow on every step. |
+| **06 Computation Path** | Scrollable log of every `(state, input, stackTop)` triple in the trace. Scrolls internally — the page itself never jumps. Click any entry to replay that step. |
+
+---
+
+### Learn PDA
+
+Self-contained theory reference. No interaction required.
+
 | Section | Content |
 |---|---|
-| **Informal Definition** | Plain-language explanation of how a PDA works and what makes it more powerful than a Finite Automaton |
-| **Formal Definition** | Full 7-tuple `M = (Q, Σ, Γ, δ, q₀, Z₀, F)` with descriptions of every component |
-| **Acceptance Criteria** | Explains acceptance by final state vs. acceptance by empty stack |
-| **FA vs PDA Comparison** | Side-by-side table: memory, language class, example languages |
-| **Transition Function δ** | Format explained with worked examples including ε-transitions |
-| **Example Languages** | Detailed strategy walkthroughs for both `aⁿbⁿ` and balanced parentheses |
+| **Informal Definition** | What a PDA is and why a stack makes it more powerful than a Finite Automaton. |
+| **Formal Definition** | Full 7-tuple `M = (Q, Σ, Γ, δ, q₀, Z₀, F)` with a description of every component. |
+| **Acceptance** | Summary — accepted by final state OR by empty stack. |
+| **PDA vs FA** | Comparison table: memory, language class, example languages. |
+| **Acceptance Methods** | Detailed breakdown of both acceptance methods: |
+| | **Method 1 — Final State L(P):** formal definition, key points, step-by-step `aⁿbⁿ` simulation example showing transition to `qf ∈ F`. |
+| | **Method 2 — Empty Stack N(P):** formal definition, key points, step-by-step `aⁿbⁿ` simulation example showing stack emptying to `ε`. |
+| | Comparison table (acceptance criteria, stack content, final state requirements) and equivalence theorem. |
+| **ε-Transitions** | What epsilon moves are, their notation, and their role in both acceptance methods and phase switching. |
+| **Classic Languages** | Language walkthroughs for each built-in preset with strategy, transitions, and accepted/rejected examples. |
 
-### Transition Editor Tab
+---
+
+### Table Editor
+
+Build or edit a PDA from scratch using a visual table — no JSON required.
+
 | Feature | Description |
 |---|---|
-| **JSON Editor** | Edit the PDA's full configuration (states, alphabets, transitions) directly in the browser |
-| **Schema Reference** | Inline documentation panel explaining every field and the push-string format |
-| **Live Apply** | Click "Apply Changes" to instantly load the modified PDA into the simulator |
-| **Validation** | Checks for required fields and reports JSON parse errors with inline messages |
+| **PDA Metadata** | Set PDA name, initial state, initial stack symbol, and accept states. |
+| **Transition Table** | Each rule is a row with editable cells: From State, Input, Stack Top, To State, Push. Click **+ Add Transition Row** to append. Click ✕ to delete a row. |
+| **ε Insert button** | Pill button next to the rules counter. Click it to insert `ε` at the cursor in whichever table cell you last focused — saves typing. |
+| **Rules counter** | Live count of defined rules (e.g. `3 rules`). |
+| **Quick-Parse** | Paste textbook-style rules (one per line) and click **Parse & Add Rows** to bulk-import. |
+| **Export to Simulator** | Compiled PDA loads directly into the Simulator tab. |
+
+---
+
+## Built-in Languages (7 Presets)
+
+All presets use `qf` to denote the unique final/accept state.
+
+| Preset | Language | Description |
+|---|---|---|
+| `aⁿbⁿ` | `{ aⁿbⁿ \| n ≥ 1 }` | Equal a's then b's. Push A per 'a', pop per 'b'. |
+| `( )` | Balanced Parentheses | Push P per `(`, pop per `)`. Accept when stack returns to `Z₀`. |
+| `aⁿbᵐcⁿ⁺ᵐ` | `{ aⁿbᵐcⁿ⁺ᵐ \| n,m ≥ 1 }` | Total c's equals n+m. Push A per 'a', B per 'b', pop one per 'c'. |
+| `aⁿbⁿ⁺ᵐcᵐ` | `{ aⁿbⁿ⁺ᵐcᵐ \| n ≥ 1, m ≥ 0 }` | First n b's cancel a's; extra m b's matched by m c's. |
+| `aⁿ⁺ᵐbᵐcⁿ` | `{ aⁿ⁺ᵐbᵐcⁿ \| n,m ≥ 0 }` | Push all a's (n+m), pop m for b's, pop n for c's. |
+| `aⁿb²ⁿ` | `{ aⁿb²ⁿ \| n ≥ 1 }` | Each 'a' contributes 2 A's; each 'b' pops one. |
+| `wcwᴿ` | `{ wcwᴿ \| w ∈ {a,b}* }` | Push w, pass centre 'c', pop and match reverse. |
+
+---
+
+## PDA Engine — Technical Notes
+
+**Stack model:** Stack symbols are atomic space-separated tokens. `"A Z0"` means push `A` on top of `Z0`. Use `""` or `"ε"` for a pop-only move.
+
+**ε-transitions:** After all input is consumed, the engine automatically follows ε-chains to reach an accept state if one exists.
+
+**Final states:** All built-in presets label their accept state `qf` to make acceptance explicit in the diagram.
+
+**Bidirectional stepping:** Step forward with ⏭, step backward with ⏮. The state diagram, tape, stack, explanation, and transition highlight all rewind correctly.
 
 ---
 
@@ -59,163 +106,32 @@ The simulator features a three-panel layout:
 
 ```
 PDA_Sim/
-├── index.html      # Page structure — 3 tabs, all panels
-├── style.css       # Full design system (tokens, components, animations)
-├── pda.js          # PDA engine — automaton model + step-trace simulation
-└── app.js          # UI controller — canvas, tape, stack, log, editor
+├── index.html    # Page structure — 3 tabs, all panels
+├── style.css     # Design system — tokens, layout, components, animations
+├── pda.js        # PDA engine — automaton model, preset library, step-trace simulation
+└── app.js        # UI controller — canvas renderer, tape, stack, controls, table editor
 ```
 
 ---
 
 ## Getting Started
 
-1. Clone or download this repository
-2. Open `index.html` in any modern browser (Chrome, Firefox, Edge, Safari)
-3. No installation, no server, no build step required
-
 ```bash
 git clone https://github.com/your-username/PDA_Sim.git
 cd PDA_Sim
-open index.html   # macOS
-# or just double-click index.html
+open index.html   # macOS — or just double-click index.html
 ```
+
+No npm, no bundler, no server needed.
 
 ---
 
-## Pre-configured Languages
+## Design
 
-### L = { aⁿbⁿ | n ≥ 1 }
-Accepts strings where the number of `a`s equals the number of `b`s.
-
-| Accepted | Rejected |
+| | |
 |---|---|
-| `ab` | `a` |
-| `aabb` | `ba` |
-| `aaabbb` | `aab` |
-| `aaaabbbb` | `abba` |
-
-**Strategy:** Push one stack symbol (`A`) for each `a`. Pop one for each `b`. Accept if stack returns to `Z₀` when input is exhausted.
-
-**Transitions:**
-```
-δ(q0, a, Z0) → (q0, A Z0)   — push A, keep Z0
-δ(q0, a, A)  → (q0, A A)    — push another A
-δ(q0, b, A)  → (q1, ε)      — first b: pop A
-δ(q1, b, A)  → (q1, ε)      — subsequent b's: pop A
-δ(q1, ε, Z0) → (q2, Z0)     — all matched: go to accept
-```
-
----
-
-### Balanced Parentheses
-Accepts strings of correctly nested and matched parentheses.
-
-| Accepted | Rejected |
-|---|---|
-| `()` | `)(` |
-| `(())` | `(()` |
-| `(()())` | `(()`  |
-| `((()))` | `())` |
-
-**Strategy:** Push `P` for each `(`. Pop `P` for each `)`. Accept if stack returns to `Z₀`.
-
-**Transitions:**
-```
-δ(q0, (, Z0) → (q0, P Z0)   — push P, keep Z0
-δ(q0, (, P)  → (q0, P P)    — push another P
-δ(q0, ), P)  → (q0, ε)      — pop matching P
-δ(q0, ε, Z0) → (q1, Z0)     — balanced: go to accept
-```
-
----
-
-## ⚙ PDA Engine — Technical Details
-
-### Stack Symbol Model
-Stack symbols are **atomic tokens** — `Z0` is a single symbol, not two characters `Z` and `0`. The push string in each transition uses **space-separated tokens**:
-
-```json
-{ "from": "q0", "input": "a", "stackTop": "Z0", "to": "q0", "push": "A Z0" }
-```
-> `"A Z0"` means: pop `Z0`, push `Z0`, then push `A` — so `A` ends on top.
-
-Use `""` or `"ε"` for a pop-only transition (push nothing).
-
-### ε-Transitions
-After all input is consumed, the engine automatically follows ε-transition chains to reach an accept state if possible.
-
-### Custom PDA via Editor
-You can define your own PDA using this JSON schema:
-
-```json
-{
-  "name": "My Language",
-  "description": "What this PDA recognizes",
-  "states": ["q0", "q1"],
-  "inputAlphabet": ["a", "b"],
-  "stackAlphabet": ["A", "Z0"],
-  "initialState": "q0",
-  "initialStack": "Z0",
-  "acceptStates": ["q1"],
-  "transitions": [
-    { "from": "q0", "input": "a", "stackTop": "Z0", "to": "q0", "push": "A Z0" }
-  ],
-  "examples": ["ab", "aabb"]
-}
-```
-
----
-
-## Design System
-
-| Token | Value |
-|---|---|
-| Background | `#0d0d0d` (Jet Black) |
-| Surface | `#131313` / `#1a1a1a` |
-| Accent | `#ffd60a` (Amber Yellow) |
-| Foreground | `#f4f4f4` (Off White) |
-| Accept color | `#39d353` (Green) |
-| Reject color | `#f85149` (Red) |
-| Code font | JetBrains Mono |
-| UI font | Inter |
-
----
-
-## Verified Test Cases
-
-| Input | Language | Result |
-|---|---|---|
-| `ab` | aⁿbⁿ | ACCEPTED |
-| `aabb` | aⁿbⁿ | ACCEPTED |
-| `aaabbb` | aⁿbⁿ | ACCEPTED |
-| `aaaabbbb` | aⁿbⁿ | ACCEPTED |
-| `ba` | aⁿbⁿ | REJECTED |
-| `()` | Balanced Parens | ACCEPTED |
-| `(())` | Balanced Parens | ACCEPTED |
-| `(()())` | Balanced Parens | ACCEPTED |
-| `)(` | Balanced Parens | REJECTED |
-
----
-
-## What is a Pushdown Automaton?
-
-A **Pushdown Automaton** is a computational model that extends a Finite Automaton with an unbounded **stack** (LIFO memory). This extra memory allows it to recognize all **Context-Free Languages** — a strictly larger class than what DFAs/NFAs can handle.
-
-**Formally**, a PDA is a 7-tuple:
-
-```
-M = (Q, Σ, Γ, δ, q₀, Z₀, F)
-```
-
-| Symbol | Meaning |
-|---|---|
-| `Q` | Finite set of states |
-| `Σ` | Input alphabet |
-| `Γ` | Stack alphabet |
-| `δ` | Transition function: Q × (Σ ∪ {ε}) × Γ → P(Q × Γ*) |
-| `q₀` | Initial state |
-| `Z₀` | Initial stack symbol |
-| `F` | Set of accepting states |
-
----
-
+| **Theme** | Jet Black `#0d0d0d` · Amber Yellow `#ffd60a` · Off White `#f4f4f4` |
+| **Accept** | Green `#39d353` |
+| **Reject** | Red `#f85149` |
+| **Fonts** | JetBrains Mono (code) · Inter (UI) |
+| **Light mode** | Toggle in the top-right header |
