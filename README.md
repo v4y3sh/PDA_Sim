@@ -10,7 +10,10 @@ An interactive Pushdown Automaton (PDA) Simulator built with pure HTML, CSS, and
   <img width="1440" height="812" alt="image" src="https://github.com/user-attachments/assets/79833eaa-beda-4e20-9367-f0291a3c9d06" />
 
 - **Learn PDA** — Theory reference covering formal definition, acceptance methods (final state & empty stack), ε-transitions, and classic language walkthroughs
+  <img width="1440" height="810" alt="image" src="https://github.com/user-attachments/assets/293a01eb-48d6-460b-a4c4-6b5ded9ac8cb" />
+
 - **Table Editor** — Build or edit a custom PDA rule-by-rule with ε-insert support and textbook quick-parse
+  <img width="1440" height="809" alt="image" src="https://github.com/user-attachments/assets/b035d017-2d04-4ee9-a0a6-1bfdff16aea3" />
 
 ---
 
